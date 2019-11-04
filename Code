@@ -1,0 +1,29 @@
+install.packages("openxlsx")
+install.packages("XML")
+install.packages("data.table")
+install.packages("tidyverse")
+install.packages("usmap")
+library(openxlsx)
+library(XML)
+library(readxl)
+library(data.table)
+library(tidyverse)
+library(usmap)
+
+# Read in average teacher salary from a URL
+MapData <- readHTMLTable('http://www.nea.org/home/2017-2018-average-starting-teacher-salary.html')
+MapData <- data.frame(MapData)
+
+# Clean data
+MapData <- MapData[-c(1,5,12),  ]
+names(MapData) <- c("state", "Avg_Starting_Salary")
+MapData$Avg_Starting_Salary <- gsub("\\$", "", MapData$Avg_Starting_Salary)
+MapData$Avg_Starting_Salary <- gsub(",", "", MapData$Avg_Starting_Salary)
+MapData$Avg_Starting_Salary <- as.numeric(MapData$Avg_Starting_Salary)
+class(MapData$Avg_Starting_Salary)
+
+# Plot statewise comparison of average teacher salaries
+plot_usmap(data = MapData, values = "Avg_Starting_Salary", 
+           lines = "blue", labels = TRUE) + 
+  scale_fill_continuous(low = "white", high = "blue", name = "Avg. Starting Teacher Salary (USD, 2017-18)", label = scales::comma) + 
+  theme(legend.position = "right")
